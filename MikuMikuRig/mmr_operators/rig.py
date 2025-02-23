@@ -274,7 +274,7 @@ def RIG2(context):
         if bone_type!="None" and bone_type in rigify_bones_list:
             rigify_bone=rigify_arm.data.edit_bones[bone_type]
             remain_bone.discard(bone_type)
-            if bone.mmr_bone.invert:
+            if bone.mmr_bone.invert: # 此处会导致骨骼消失
                 rigify_bone.head=bone.tail
             else:
                 rigify_bone.head=bone.head
