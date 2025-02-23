@@ -41,7 +41,7 @@ class MMR_property(bpy.types.PropertyGroup):
     auto_select_mesh:BoolProperty(default=True,description="自动选择模型")
     auto_select_rigid_body:BoolProperty(default=True,description="自动选择刚体")
     extend_ribbon:BoolProperty(default=True,description="延展飘带区域")
-    debug:BoolProperty(default=True,description="debug")
+    debug:BoolProperty(default=False,description="debug")
     rig_preset_name:EnumProperty(
         items=mmr_operators.preset.get_rig_preset_item,
         description=('Choose the preset you want to use'),

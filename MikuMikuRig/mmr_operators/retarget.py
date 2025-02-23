@@ -505,7 +505,7 @@ def retarget_mixmao(OT,context):
         context.scene.frame_current=old_frame
 
 
-    rigify_arm.select=True
+    rigify_arm.select_set(True)
     alert_error("提示","导入完成,匹配骨骼数:"+str(match_bone_number))
     return(True)
     
@@ -606,11 +606,8 @@ def load_vmd(OT,context):
     bone_a.rotation_mode='QUATERNION'
     bone_a.rotation_quaternion=mat_3.to_quaternion()
     
-    bpy.ops.mmd_tools.import_vmd(filepath=vmd_path,scale=action_scale_finel,use_pose_mode=True, margin=0)
-    bpy.context.scene.frame_end=old_frame_end
+    bpy.ops.mmd_tools.import_vmd(files= [{"name": vmd_path}],scale=action_scale_finel,use_pose_mode=True, margin=0)
     
-
-    rigify_arm2.animation_data.action = bpy.data.actions.new(action_name)
     vmd_action = rigify_arm2.animation_data.action
 
     fcurves=vmd_action.fcurves
@@ -713,15 +710,13 @@ def load_vmd(OT,context):
     mmd_arm.data.edit_bones["全ての親"].matrix=rigify_arm.data.bones[rigify_dict['Root']].matrix_local
 
     bpy.ops.object.mode_set(mode = 'POSE')
-    bpy.ops.mmd_tools.import_vmd(filepath=vmd_path,scale=1, margin=0)
-    bpy.context.scene.frame_end=old_frame_end
+    bpy.ops.mmd_tools.import_vmd(files=[{"name": vmd_path}],scale=1, margin=0)
     bpy.ops.pose.select_all(action='DESELECT')
     bake_name_list=['foot.L','foot.R','shoulder.L','shoulder.R','upper_arm.L','upper_arm.R','forearm.L','forearm.R','hand.L','hand.R','spine']
     for name in bake_name_list:
         mmd_arm.data.bones[name].select=True
 
     mmd_arm.animation_data_create()
-    mmd_arm.animation_data.action = bpy.data.actions.new(mmd_arm.name + "Action")
     vmd_action2=mmd_arm.animation_data.action
     fcurves2=vmd_action2.fcurves
     frame_range=vmd_action2.frame_range
@@ -966,7 +961,7 @@ def load_vmd(OT,context):
         bpy.data.objects.remove(mmd_arm,do_unlink=True)
         bpy.data.scenes.remove(new_scene,do_unlink=True)
     bpy.context.view_layer.objects.active=rigify_arm
-    rigify_arm.select=True
+    rigify_arm.select_set(True)
     alert_error("提示","导入完成")
 
     return(True)
@@ -1029,7 +1024,7 @@ def export_vmd(OT,context):
     context.collection.objects.link(mmd_arm2)
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active=mmd_arm2
-    mmd_arm2.select=True
+    mmd_arm2.select_set(True)
     print(vmd_path)
 
     if set_action_range:
@@ -1055,7 +1050,7 @@ def export_vmd(OT,context):
         else:
             bone.bone.select=False
 
-    bpy.ops.nla.bake(frame_start=start_frame1, frame_end=end_frame1, only_selected=True, visual_keying=True,clear_constraints=True, bake_types={'POSE'})
+    bpy.ops.nla.bake(frame_start=int(start_frame1), frame_end=int(end_frame1), only_selected=True, visual_keying=True,clear_constraints=True, bake_types={'POSE'})
     bpy.ops.object.mode_set(mode = 'OBJECT')
 
     mmd_action=mmd_arm2.animation_data.action
