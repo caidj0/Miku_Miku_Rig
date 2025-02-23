@@ -73,11 +73,11 @@ def retarget_mixmao(OT,context):
     type_from_to_list=[]
     match_bone_number=0
     for bone in mixamo_arm.pose.bones:
-        if bone.mmr_bone_type !='None':
-            from_dict[bone.mmr_bone_type]=bone.name
+        if bone.mmr_bone.bone_type !='None':
+            from_dict[bone.mmr_bone.bone_type]=bone.name
     for bone in rigify_arm.pose.bones:
-        if bone.mmr_bone_type !='None':
-            to_dict[bone.mmr_bone_type]=bone.name
+        if bone.mmr_bone.bone_type !='None':
+            to_dict[bone.mmr_bone.bone_type]=bone.name
     for bone_type,from_name in from_dict.items():
         if bone_type in to_dict:
             to_name=to_dict[bone_type]
@@ -569,9 +569,9 @@ def load_vmd(OT,context):
     rigify_dict={}
     for bone in rigify_arm2.pose.bones:
         bone1=rigify_arm.pose.bones[bone.name]
-        bone_type=bone.mmr_bone_type
+        bone_type=bone.mmr_bone.bone_type
         if bone_type != 'None':
-            rigify_dict[bone.mmr_bone_type]=bone.name
+            rigify_dict[bone.mmr_bone.bone_type]=bone.name
             if bone_type in mmd_dict:
                 bone.mmd_bone.name_j=mmd_dict[bone_type]
                 bone1.rotation_mode = 'QUATERNION'
@@ -610,8 +610,9 @@ def load_vmd(OT,context):
     bpy.context.scene.frame_end=old_frame_end
     
 
-    vmd_action=rigify_arm2.animation_data.action
-    vmd_action.name=action_name
+    rigify_arm2.animation_data.action = bpy.data.actions.new(action_name)
+    vmd_action = rigify_arm2.animation_data.action
+
     fcurves=vmd_action.fcurves
     frame_range=vmd_action.frame_range
 
@@ -634,20 +635,22 @@ def load_vmd(OT,context):
                     path2=IK_bone.path_from_id(attr_name)
 
                     fcurve1=fcurves.find(path1,index=index)
-                    fcurve2=fcurves.new(path2,index=index)
+                    
+                    if (fcurve1 != None):
+                        fcurve2=fcurves.new(path2,index=index)
 
-                    keyframe_points1=fcurve1.keyframe_points
-                    keyframe_points2=fcurve2.keyframe_points
+                        keyframe_points1=fcurve1.keyframe_points
+                        keyframe_points2=fcurve2.keyframe_points
 
-                    keyframe_len=len(keyframe_points1)
-                    keyframe_points2.add(keyframe_len)
+                        keyframe_len=len(keyframe_points1)
+                        keyframe_points2.add(keyframe_len)
 
-                    for i,keyframe1 in enumerate(keyframe_points1):
-                        keyframe2=keyframe_points2[i]
+                        for i,keyframe1 in enumerate(keyframe_points1):
+                            keyframe2=keyframe_points2[i]
 
-                        for keyframe_data in keyframe_data_list:
-                            attr=getattr(keyframe1,keyframe_data)
-                            setattr(keyframe2,keyframe_data,attr)
+                            for keyframe_data in keyframe_data_list:
+                                attr=getattr(keyframe1,keyframe_data)
+                                setattr(keyframe2,keyframe_data,attr)
 
     
     copy_fcurve('thigh.L')
@@ -717,11 +720,13 @@ def load_vmd(OT,context):
     for name in bake_name_list:
         mmd_arm.data.bones[name].select=True
 
+    mmd_arm.animation_data_create()
+    mmd_arm.animation_data.action = bpy.data.actions.new(mmd_arm.name + "Action")
     vmd_action2=mmd_arm.animation_data.action
     fcurves2=vmd_action2.fcurves
     frame_range=vmd_action2.frame_range
 
-    bpy.ops.nla.bake(frame_start=frame_range[0], frame_end=frame_range[1], visual_keying=True, clear_constraints=True, use_current_action=True, bake_types={'POSE'})
+    bpy.ops.nla.bake(frame_start=int(frame_range[0]), frame_end=int(frame_range[1]), visual_keying=True, clear_constraints=True, use_current_action=True, bake_types={'POSE'})
     context.window.scene=old_scene
     
     #检测IKFK动作
