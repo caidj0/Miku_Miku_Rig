@@ -973,20 +973,16 @@ def decorate_mmd_arm(context):
     }
 
     #设置骨骼组颜色
-    for bone_group in mmd_arm.pose.bone_groups:
-        name=bone_group.name
-        if name in bone_color_dict:
-            bone_group.color_set=bone_color_dict[name]
+    for collection_name, theme in bone_color_dict.items():
+        collection = mmd_arm.data.collections_all.get(collection_name)
+        if collection != None:
+            for bone in collection.bones:
+                bone.color.palette = theme
 
     #设置骨骼层
     for pose_bone in pose_bones:
         bone=pose_bone.bone
         name_j=pose_bone.mmd_bone.name_j
-
-        if pose_bone.bone_group and pose_bone.bone_group.name in bone_color_dict:
-            set_bone_layer(bone,0)
-        else:
-            set_bone_layer(bone,1)
         
         #设置IK限制
         if name_j in arm_bone_dict:
